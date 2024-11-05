@@ -21,55 +21,84 @@ public class IQACScoreService {
     private TrainingDevelopmentRepository trainingDevelopmentRepository;
 
     public Double calculateIQACScore(Long facultyId) {
-        Double totalScore = 0.0;
 
-        // 1. Calculate Teacher Performance Score
-        TeacherPerformance performance = teacherPerformanceRepository.findById(facultyId).orElse(null);
-        if (performance != null) {
-            Double performanceScore = (performance.getPerformanceScore() / 10)
-                    + (performance.getTeachingExperienceYears() * 1.5)
-                    + (performance.getFeedbackScore() != null ? performance.getFeedbackScore() * 0.5 : 0);
-            totalScore += performanceScore;
-        }
+        Double totalScore =
+                getPerformanceScore(facultyId)+
+                getResearchScore(facultyId)+
+                getPhdScore(facultyId)+
+                getCommunityScore(facultyId)+
+                getTrainingScore(facultyId);
 
-        // 2. Calculate Research Contribution Score
-        ResearchContribution research = researchContributionRepository.findById(facultyId).orElse(null);
-        if (research != null) {
-            Double researchScore = (double) ((research.getPapersPublished() * 2)
-                                + (research.getConferencesAttended() != null ? research.getConferencesAttended() * 3 : 0)
-                                + (research.getProjectsCompleted() * 4)
-                                + (research.getPapersPublished() * 5));
-            totalScore += researchScore;
-        }
+        return totalScore;
+    }
 
-        // 3. Calculate PhD Supervision Score
-        PhDPapers phdPapers = phdPapersRepository.findById(facultyId).orElse(null);
-        if (phdPapers != null) {
-            Double phdScore = (double) ((phdPapers.getPapersSupervised() * 4)
-                                + (phdPapers.getThesesGuided() * 2));
-            totalScore += phdScore;
-        }
-
-        // 4. Calculate Community Service Score
-        CommunityService communityService = communityServiceRepository.findById(facultyId).orElse(null);
-        if (communityService != null) {
-            Double communityScore = (communityService.getServiceHours() * 1.2)
-                    + (communityService.getProjectsParticipated() * 2)
-                    + (communityService.getEventsOrganized() * 3)
-                    + (communityService.getForeignParticipation() ? 5 : 0);
-            totalScore += communityScore;
-        }
+    private Double getTrainingScore(Long facultyId) {
 
         // 5. Calculate Training & Development Score
-        TrainingDevelopment training = trainingDevelopmentRepository.findById(facultyId).orElse(null);
+        Double trainingScore = 0.0;
+        TrainingDevelopment training = trainingDevelopmentRepository.findByFacultyId(facultyId);
         if (training != null) {
-            Double trainingScore = (training.getTrainingsAttended() * 1.5)
+            trainingScore = (training.getTrainingsAttended() * 1.5)
                     + (training.getCertificationsObtained() * 3)
                     + (training.getWorkshopsConducted() * 4)
                     + (training.getOnlineCoursesCompleted() * 2);
-            totalScore += trainingScore;
+        }
+        return trainingScore;
+
+
+    }
+
+    private Double getCommunityScore(Long facultyId) {
+        Double communityScore = 0.0;
+        // 4. Calculate Community Service Score
+        CommunityService communityService = communityServiceRepository.findByFacultyId(facultyId);
+        if (communityService != null) {
+             communityScore = (communityService.getServiceHours() * 1.2)
+                    + (communityService.getProjectsParticipated() * 2)
+                    + (communityService.getEventsOrganized() * 3)
+                    + (communityService.getForeignParticipation() ? 5 : 0);
         }
 
-        return totalScore;
+        return communityScore;
+
+    }
+
+    private Double getPhdScore(Long facultyId) {
+        // 3. Calculate PhD Supervision Score
+        Double phdScore = 0.0;
+        PhDPapers phdPapers = phdPapersRepository.findByFacultyId(facultyId);
+        if (phdPapers != null) {
+             phdScore = (double) ((phdPapers.getPapersSupervised() * 4)
+                    + (phdPapers.getThesesGuided() * 2));
+        }
+
+        return phdScore;
+    }
+
+    private Double getResearchScore(Long facultyId) {
+        // 2. Calculate Research Contribution Score
+        Double researchScore = 0.0;
+        ResearchContribution research = researchContributionRepository.findByFacultyId(facultyId);
+        if (research != null) {
+            researchScore = (double) ((research.getPapersPublished() * 2)
+                    + (research.getConferencesAttended() != null ? research.getConferencesAttended() * 3 : 0)
+                    + (research.getProjectsCompleted() * 4)
+                    + (research.getPapersPublished() * 5));
+        }
+        return researchScore;
+    }
+
+    private Double getPerformanceScore(Long facultyId) {
+        // 1. Calculate Teacher Performance Score
+        Double performanceScore = 0.0;
+        TeacherPerformance performance = teacherPerformanceRepository.findByFacultyId(facultyId);
+
+        if (performance != null) {
+            performanceScore = (performance.getPerformanceScore() / 10)
+                    + (performance.getTeachingExperienceYears() * 1.5)
+                    + (performance.getFeedbackScore() != null ? performance.getFeedbackScore() * 0.5 : 0)
+                    + (performance.getCoursesTaught() * 0.1);
+        }
+        return performanceScore;
     }
 }
