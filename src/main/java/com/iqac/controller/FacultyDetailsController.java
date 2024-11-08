@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/faculties")
+@CrossOrigin
 public class FacultyDetailsController {
     @Autowired
     private FacultyDetailsService facultyDetailsService;
